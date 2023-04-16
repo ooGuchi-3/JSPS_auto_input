@@ -23,8 +23,8 @@ def convert_date_to_flag(x):
     }
     return date_to_flag_map[x.date]
 
-def determine_receipt(row):
-    if row.determine_receipt == "あり":
+def is_receipt(row):
+    if row.is_receipt == "あり":
         return "etr_needOrNotReceipt_01"
     else:
         return "etr_needOrNotReceipt_02"
@@ -56,8 +56,8 @@ def enter_forum(row):
     select_date = Select(dropdown_date)
     select_date.select_by_index(row.date)
     
-    wait.until(EC.element_to_be_clickable((By.ID, str(row.determine_receipt))))
-    driver.find_element(By.ID,str(row.determine_receipt)).click()
+    wait.until(EC.element_to_be_clickable((By.ID, str(row.is_receipt))))
+    driver.find_element(By.ID,str(row.is_receipt)).click()
     
     wait.until(EC.presence_of_element_located((By.NAME,"etr_itemName")))
     driver.find_element(By.NAME,"etr_itemName").send_keys(row.item)
@@ -75,14 +75,14 @@ if __name__ == '__main__':
     df = pd.read_excel(settings.EXCEL_SHEET_PATH, usecols=[0,1,2,3,4,5,6,7]).dropna(how='all').fillna('')
 
     # seleniumで入力するためのidやキーを纏めたデータを作成する
-    df.columns = ["date", "item", "value", "is_tax","number", "expenditure", "determine_receipt", "remark"]
+    df.columns = ["date", "item", "value", "is_tax","number", "expenditure", "is_receipt", "remark"]
     df['date'] = df['date'].dt.strftime("%Y-%m")
     df['value'] = df.apply(lambda x: add_tax(x), axis = 1)*df["number"]
     df["date"] = df.apply(lambda x: convert_date_to_flag(x), axis = 1)
-    df["determine_receipt"] = df.apply(lambda x: determine_receipt(x), axis = 1)
+    df["is_receipt"] = df.apply(lambda x: is_receipt(x), axis = 1)
     df["expenditure"] = df.apply(lambda x: assign_expenditure(x), axis = 1)
     df_l = [list(row) for row in df.itertuples()]
-    df = df[["date", "item", "expenditure", "determine_receipt", "value", "remark"]]
+    df = df[["date", "item", "expenditure", "is_receipt", "value", "remark"]]
     df["value"] = pd.Series(df["value"], dtype = 'int64')
 
     driver = webdriver.Chrome(executable_path=settings.DRIVER_PATH)
