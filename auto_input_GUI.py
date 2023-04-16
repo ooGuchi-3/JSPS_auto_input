@@ -37,7 +37,7 @@ if __name__ == '__main__':
 
     df['value'] = df.apply(lambda x: auto_input.add_tax(x), axis = 1)*df["number"]
     df["date"] = df.apply(lambda x: auto_input.convert_date_to_flag(x), axis = 1)
-    df["is_receipt"] = df.apply(lambda x: auto_input.is_receipt(x), axis = 1)
+    df["is_receipt"] = df.apply(lambda x: auto_input.determine_receipt(x), axis = 1)
     df["expenditure"] = df.apply(lambda x: auto_input.assign_expenditure(x), axis = 1)
 
     df_l = [list(row) for row in df.itertuples()]
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     driver = webdriver.Chrome(executable_path=r"./chromedriver.exe")
 
-    J_SYSTEM_URL = "https://tyousa.jsps.go.jp/stu22/"
+    J_SYSTEM_URL = auto_input.J_SYSTEM_URL
     J_SYSTEM_ID = values["J_SYSTEM_ID"]
     J_SYSTEM_PASS = values["J_SYSTEM_PASS"]
 
